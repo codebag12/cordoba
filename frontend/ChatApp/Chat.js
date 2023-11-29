@@ -3,12 +3,13 @@ import { View, Text, TextInput, Button, FlatList, AppState } from 'react-native'
 import io from 'socket.io-client';
 
 console.log('Initializing client...'); // Log client initialization
-const socket = io("http://192.168.0.91:3000");
+const socket = io("http://172.16.30.49:3000");
 
 const Chat = () => {
     console.log('Setting up Chat component'); // Log setup of Chat component
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
+    const [room, setRoom] = useState(''); // For room functionality
 
     useEffect(() => {
         console.log('Setting up socket event listeners'); // Log setup of socket listeners
@@ -22,6 +23,8 @@ const Chat = () => {
             setMessages(prevMessages => [...prevMessages, msg]);
         });
 
+       
+
         const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
 
         return () => {
@@ -30,6 +33,14 @@ const Chat = () => {
             appStateSubscription.remove();
         };
     }, []);
+
+    const joinRoom = () => {
+        socket.emit('join room', room);
+    };
+
+    const leaveRoom = () => {
+        socket.emit('leave room', room);
+    };
 
     const handleAppStateChange = (nextAppState) => {
         console.log('App state changed to:', nextAppState); // Log app state changes
@@ -51,6 +62,18 @@ const Chat = () => {
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            
+            {/* Room join/leave functionality */}
+            <TextInput
+                value={room}
+                onChangeText={setRoom}
+                placeholder="Enter Room Name"
+            />
+            <Button onPress={joinRoom} title="Join Room" />
+            <Button onPress={leaveRoom} title="Leave Room" />
+            
+            
+            
             <FlatList
                 data={messages}
                 renderItem={({ item }) => (
