@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, FlatList, AppState } from 'react-native'
 import io from 'socket.io-client';
 
 console.log('Initializing client...'); // Log client initialization
-const socket = io("http://172.16.30.49:3000");
+const socket = io("http://192.168.1.176:3000");
 
 const Chat = () => {
     console.log('Setting up Chat component'); // Log setup of Chat component
@@ -23,7 +23,6 @@ const Chat = () => {
             setMessages(prevMessages => [...prevMessages, msg]);
         });
 
-       
 
         const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
 
