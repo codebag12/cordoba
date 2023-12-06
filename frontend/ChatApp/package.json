@@ -12,6 +12,7 @@
   "dependencies": {
     "react": "18.2.0",
     "react-native": "0.72.7",
+    "redis": "^4.6.11",
     "socket.io-client": "^4.7.2"
   },
   "devDependencies": {

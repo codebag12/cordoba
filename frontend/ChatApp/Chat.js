@@ -26,6 +26,13 @@ const Chat = () => {
 
         const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
 
+        
+        socket.on('past messages', (pastMessages) => {
+            console.log('Received past messages:', pastMessages);
+            setMessages(pastMessages);
+          });
+        
+        
         return () => {
             console.log('Cleaning up event listeners'); // Log cleanup
             socket.off('chat message');
