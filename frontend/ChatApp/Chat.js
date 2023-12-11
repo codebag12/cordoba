@@ -2,43 +2,44 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, AppState } from 'react-native';
 import io from 'socket.io-client';
 
-console.log('Initializing client...'); // Log client initialization
-const socket = io("http://192.168.3.137:3000");
+console.log('Initializing client...');
+const socket = io("http://192.168.22.241:3000");
 
 const Chat = () => {
-    console.log('Setting up Chat component'); // Log setup of Chat component
+    console.log('Setting up Chat component');
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
-    const [room, setRoom] = useState(''); // For room functionality
+    const [room, setRoom] = useState('');
 
     useEffect(() => {
-        console.log('Setting up socket event listeners'); // Log setup of socket listeners
+        console.log('Setting up socket event listeners');
         
         socket.on('connect', () => {
-            console.log('Connected to server'); // Log successful connection
+            console.log('Connected to server');
         });
 
         socket.on('chat message', (msg) => {
-            console.log('Received message:', msg); // Log received messages
+            console.log('Received message:', msg);
             setMessages(prevMessages => [...prevMessages, msg]);
         });
 
-
         const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
 
-        
-        socket.on('past messages', (pastMessages) => {
-            console.log('Received past messages:', pastMessages);
-            setMessages(pastMessages);
-          });
-        
-        
         return () => {
-            console.log('Cleaning up event listeners'); // Log cleanup
+            console.log('Cleaning up event listeners');
             socket.off('chat message');
             appStateSubscription.remove();
         };
     }, []);
+
+    const handleAppStateChange = (nextAppState) => {
+        console.log('App state changed to:', nextAppState);
+        if (nextAppState === 'active') {
+            console.log('App is in foreground');
+        } else {
+            console.log('App is in background');
+        }
+    };
 
     const joinRoom = () => {
         socket.emit('join room', room);
@@ -48,21 +49,21 @@ const Chat = () => {
         socket.emit('leave room', room);
     };
 
-    const handleAppStateChange = (nextAppState) => {
-        console.log('App state changed to:', nextAppState); // Log app state changes
-        if (nextAppState === 'active') {
-            console.log('App is in foreground');
-        } else {
-            console.log('App is in background');
+    const sendMessage = () => {
+        if (message.trim().length > 0) {
+            console.log('Sending message:', message);
+            socket.emit('chat message', message, room);
+            setMessage('');
         }
     };
 
-    const sendMessage = () => {
-        if (message.trim().length > 0) {
-            console.log('Sending message:', message); // Log message sending
-            socket.emit('chat message', message);
-            setMessages(prevMessages => [...prevMessages, message]);
-            setMessage('');
+    const fetchRoomMessages = async () => {
+        try {
+            const response = await fetch(`http://192.168.0.181:3000/room-messages/${room}`);
+            const data = await response.json();
+            setMessages(data);
+        } catch (error) {
+            console.error('Error fetching room messages:', error);
         }
     };
 
@@ -78,7 +79,8 @@ const Chat = () => {
             <Button onPress={joinRoom} title="Join Room" />
             <Button onPress={leaveRoom} title="Leave Room" />
             
-            
+            {/* Button to fetch room messages */}
+            <Button onPress={fetchRoomMessages} title="Load Room Messages" />
             
             <FlatList
                 data={messages}

@@ -11,11 +11,32 @@ console.log('Server starting...');
 // Replace with your Redis server address
 const redisClient = redis.createClient({ 
     host: 'localhost', 
-    port: 6379
+    port: 6379,
+    retry_strategy: function(options) {
+        console.log('Redis retry strategy activated'); // Added: Logging for retry strategy
+        if (options.error && options.error.code === 'ECONNREFUSED') {
+            console.error('Redis server refused the connection'); // Added: Logging the specific error
+            return new Error('The server refused the connection');
+        }
+        if (options.total_retry_time > 1000 * 60 * 60) {
+            console.error('Retry time for Redis connection exhausted'); // Added: Logging for retry timeout
+            return new Error('Retry time exhausted');
+        }
+        if (options.attempt > 10) {
+            console.error('Max retries for Redis connection exceeded'); // Added: Logging for max retries exceeded
+            return undefined;
+        }
+        return Math.min(options.attempt * 100, 3000);
+    }
 });
 
 redisClient.on("error", (err) => {
     console.error("Error connecting to Redis", err);
+});
+
+redisClient.on('end', () => {
+    console.log('Redis client disconnected'); // Added more logging
+    // Handle disconnection if necessary
 });
 
 // Function to set a message in Redis
@@ -44,6 +65,28 @@ async function getRedisCache(key) {
     });
 }
 
+app.get('/room-messages/:room', async (req, res) => {
+    try {
+        let roomMessages = [];
+        redisClient.keys(`message:${req.params.room}:*`, async (err, keys) => {
+            if (err) return res.status(500).send(err.message);
+
+            for (let key of keys) {
+                try {
+                    const message = await getRedisCache(key);
+                    roomMessages.push(message);
+                } catch (getErr) {
+                    console.error('Error getting message from Redis:', getErr); // Added error handling for getRedisCache
+                }
+            }
+
+            res.json(roomMessages);
+        });
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
@@ -55,15 +98,13 @@ io.on('connection', (socket) => {
     socket.on('join room', async (room) => {
         socket.join(room);
         console.log(`User ${socket.id} joined room ${room}`);
-        // Retrieve and send past messages for the room
-        // This part needs to be adapted based on how you choose to implement message retrieval
     });
 
     socket.on('chat message', async (msg, room) => {
         console.log('Received message:', msg);
         const messageKey = `message:${room}:${new Date().getTime()}`;
         try {
-            await setRedisCache(messageKey, msg); // Storing each message with a unique key
+            await setRedisCache(messageKey, msg);
             io.to(room).emit('chat message', msg);
         } catch (error) {
             console.error('Error setting message in Redis:', error);
