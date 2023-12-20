@@ -21,7 +21,6 @@ const Chat = () => {
         };
     }, []);
 
-   
     // Send a chat message
     const sendMessage = () => {
         if (message.trim().length > 0) {
@@ -30,40 +29,25 @@ const Chat = () => {
         }
     };
 
-   
-   
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             {/* List of chat messages */}
-            
-            
-            
             <FlatList
                 data={messages}
                 renderItem={({ item }) => (
-                  
-                  
-                  <Text style={{ padding: 10, borderWidth: 1, margin: 2 }}>
+                    <Text style={{ padding: 10, borderWidth: 1, margin: 2 }}>
                         {item}
                     </Text>
-               
-               
-               
-               )}
+                )}
                 keyExtractor={(item, index) => index.toString()}
             />
 
-            
-            
-            
             {/* UI for sending messages */}
             <TextInput
                 style={{ height: 40, borderColor: 'gray', borderWidth: 1, width: '80%' }}
                 value={message}
                 onChangeText={setMessage}
             />
-            
-            
             <Button onPress={sendMessage} title="Send Message" />
         </View>
     );

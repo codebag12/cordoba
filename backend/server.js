@@ -1,10 +1,11 @@
-const express = require('express');
-const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-const cors = require("cors");
+// Import the required modules
+const express = require('express'); // Express framework for building web applications
+const app = express(); // Create an instance of the Express application
+const http = require('http').createServer(app); // Create an HTTP server using the Express app
+const io = require('socket.io')(http); // Create a Socket.IO instance using the HTTP server
+const cors = require("cors"); // Cross-origin resource sharing middleware
 
-app.use(cors()); // Allow cross-origin requests
+app.use(cors()); // Enable cross-origin requests
 
 console.log('Server starting...');
 

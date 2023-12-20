@@ -1,13 +1,12 @@
-import React from 'react';
-import Chat from './Chat';
+import React from 'react'; // Importing React library
+import Chat from './Chat'; // Importing Chat component
 
 // Main App component that renders the Chat component
 const App = () => {
-  return <Chat />;
+  return <Chat />; // Rendering the Chat component
 };
 
-export default App;
-
+export default App; // Exporting the App component as the default export
 
 
 
