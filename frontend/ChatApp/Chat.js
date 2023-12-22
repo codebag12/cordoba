@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, FlatList } from 'react-native';
 import io from 'socket.io-client';
 
 // Initialize the Socket.IO client
-const socket = io("http://192.168.110.63:3000");
+const socket = io("http://192.168.110.64:3000");
 
 const Chat = () => {
     const [message, setMessage] = useState(''); // State for the current message
