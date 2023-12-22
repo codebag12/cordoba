@@ -10,7 +10,7 @@ app.use(cors());
 console.log('Server starting...');
 
 // MongoDB connection
-const mongoDB = 'mongodb+srv://sepreck:agadir@cluster0.r24dbox.mongodb.net/?retryWrites=true&w=majority'; // Replace with your MongoDB URI
+const mongoDB = 'mongodb+srv://sepreck:agadir@cluster0.r24dbox.mongodb.net/chatApp?retryWrites=true&w=majority'; // Replace with your MongoDB URI
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.error('MongoDB connection error:', err));
@@ -23,7 +23,7 @@ const chatSchema = new Schema({
 });
 
 // Create a model based on the schema
-const ChatMessage = mongoose.model('ChatMessage', chatSchema);
+const ChatMessage = mongoose.model('ChatMessage', chatSchema, 'messages');
 
 const PORT = process.env.PORT || 3000;
 
